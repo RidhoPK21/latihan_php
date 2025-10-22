@@ -74,7 +74,6 @@ class TodoModel
 
     public function isTitleExists($title, $id = null)
 {
-    // Ganti '=' menjadi 'ILIKE' untuk perbandingan case-insensitive
     $query = 'SELECT id FROM todo WHERE title ILIKE $1';
     $params = [$title];
     if ($id) {
