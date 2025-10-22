@@ -5,13 +5,40 @@ class TodoModel
 {
     private $conn;
 
-    public function __construct()
-    {
-        $this->conn = pg_connect('host=' . DB_HOST . ' port=' . DB_PORT . ' dbname=' . DB_NAME . ' user=' . DB_USER . ' password=' . DB_PASSWORD);
-        if (!$this->conn) {
-            die('Koneksi database gagal');
-        }
+   public function __construct() {
+    // Prioritas 1: Cek environment variable dari Vercel (POSTGRES_URL)
+    $dbUrl = getenv('POSTGRES_URL');
+
+    // Prioritas 2: Jika tidak ada, cek punya Heroku (DATABASE_URL)
+    if ($dbUrl === false) {
+        $dbUrl = getenv('DATABASE_URL');
     }
+
+    if ($dbUrl !== false) {
+        // Parse URL database dari Vercel/Heroku
+        $dbopts = parse_url($dbUrl);
+        $host = $dbopts["host"];
+        $port = $dbopts["port"];
+        $dbname = ltrim($dbopts["path"], '/');
+        $user = $dbopts["user"];
+        $password = $dbopts["pass"];
+        
+        // String koneksi untuk Vercel/Heroku
+        $this->db = pg_connect("host={$host} port={$port} dbname={$dbname} user={$user} password={$password}");
+    } else {
+        // Prioritas 3: Koneksi untuk local development
+        $host = 'localhost';
+        $port = '5432';
+        $dbname = 'latihan_php'; // Ganti dengan nama db lokal Anda
+        $user = 'postgres';     // Ganti dengan user db lokal Anda
+        $password = 'password'; // Ganti dengan password db lokal Anda
+        $this->db = pg_connect("host={$host} port={$port} dbname={$dbname} user={$user} password={$password}");
+    }
+
+    if (!$this->db) {
+        die("Error in connection: " . pg_last_error());
+    }
+}
 
     public function getAllTodos($filter = 'all', $search = '')
     {
