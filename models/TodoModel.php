@@ -5,40 +5,28 @@ class TodoModel
 {
     private $conn;
 
-   public function __construct() {
-    // Prioritas 1: Cek environment variable dari Vercel (POSTGRES_URL)
-    $dbUrl = getenv('POSTGRES_URL');
+public function __construct() {
+        // Mengambil detail koneksi dari Environment Variables Vercel
+        $host = getenv('PGHOST');
+        $port = getenv('PGPORT');
+        $dbname = getenv('PGDATABASE');
+        $user = getenv('PGUSER');
+        $password = getenv('PGPASSWORD');
 
-    // Prioritas 2: Jika tidak ada, cek punya Heroku (DATABASE_URL)
-    if ($dbUrl === false) {
-        $dbUrl = getenv('DATABASE_URL');
-    }
+        // Membangun connection string
+        $conn_string = "host={$host} port={$port} dbname={$dbname} user={$user} password={$password}";
 
-    if ($dbUrl !== false) {
-        // Parse URL database dari Vercel/Heroku
-        $dbopts = parse_url($dbUrl);
-        $host = $dbopts["host"];
-        $port = $dbopts["port"];
-        $dbname = ltrim($dbopts["path"], '/');
-        $user = $dbopts["user"];
-        $password = $dbopts["pass"];
-        
-        // String koneksi untuk Vercel/Heroku
-        $this->db = pg_connect("host={$host} port={$port} dbname={$dbname} user={$user} password={$password}");
-    } else {
-        // Prioritas 3: Koneksi untuk local development
-        $host = 'localhost';
-        $port = '5432';
-        $dbname = 'latihan_php'; // Ganti dengan nama db lokal Anda
-        $user = 'postgres';     // Ganti dengan user db lokal Anda
-        $password = 'password'; // Ganti dengan password db lokal Anda
-        $this->db = pg_connect("host={$host} port={$port} dbname={$dbname} user={$user} password={$password}");
-    }
+        // Mencoba terhubung ke database
+        $this->conn = pg_connect($conn_string);
 
-    if (!$this->db) {
-        die("Error in connection: " . pg_last_error());
+        // Opsional: tambahkan pengecekan error
+        if (!$this->conn) {
+            // Ini akan membantu debugging jika koneksi masih gagal
+            error_log("Database connection failed: " . pg_last_error());
+            // Hentikan eksekusi untuk mencegah error lebih lanjut
+            die("Connection failed. Check server logs.");
+        }
     }
-}
 
     public function getAllTodos($filter = 'all', $search = '')
     {
