@@ -5,46 +5,14 @@ class TodoModel
 {
     private $conn;
 
-    // public function __construct()
-    // {
-    //     $this->conn = pg_connect('host=' . DB_HOST . ' port=' . DB_PORT . ' dbname=' . DB_NAME . ' user=' . DB_USER . ' password=' . DB_PASSWORD);
-    //     if (!$this->conn) {
-    //         die('Koneksi database gagal');
-    //     }
-    // }
-
-    public function __construct() {
-    // Mengambil DATABASE_URL yang disediakan oleh Heroku
-    $dbUrl = getenv('DATABASE_URL');
-
-    if (empty($dbUrl)) {
-        // Fallback untuk development di lokal jika DATABASE_URL tidak ada
-        $host = 'localhost';
-        $port = '5432';
-        $dbname = 'latihan_php';
-        $user = 'postgres';
-        $password = '12345';
-        $dsn = "pgsql:host=$host;port=$port;dbname=$dbname;user=$user;password=$password";
-    } else {
-        // Parsing URL database dari Heroku
-        $dbopts = parse_url($dbUrl);
-        $dsn = sprintf(
-            "pgsql:host=%s;port=%s;dbname=%s;user=%s;password=%s",
-            $dbopts['host'],
-            $dbopts['port'],
-            ltrim($dbopts['path'], '/'),
-            $dbopts['user'],
-            $dbopts['pass']
-        );
+    public function __construct()
+    {
+        $this->conn = pg_connect('host=' . DB_HOST . ' port=' . DB_PORT . ' dbname=' . DB_NAME . ' user=' . DB_USER . ' password=' . DB_PASSWORD);
+        if (!$this->conn) {
+            die('Koneksi database gagal');
+        }
     }
 
-    try {
-        $this->db = new PDO($dsn);
-        $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    } catch (PDOException $e) {
-        die("Connection failed: " . $e->getMessage());
-    }
-}
     public function getAllTodos($filter = 'all', $search = '')
     {
         $query = 'SELECT * FROM todo';
