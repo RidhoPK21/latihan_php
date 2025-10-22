@@ -5,26 +5,11 @@ class TodoModel
 {
     private $conn;
 
-public function __construct() {
-        // Mengambil detail koneksi dari Environment Variables Vercel
-        $host = getenv('PGHOST');
-        $port = getenv('PGPORT');
-        $dbname = getenv('PGDATABASE');
-        $user = getenv('PGUSER');
-        $password = getenv('PGPASSWORD');
-
-        // Membangun connection string
-        $conn_string = "host={$host} port={$port} dbname={$dbname} user={$user} password={$password}";
-
-        // Mencoba terhubung ke database
-        $this->conn = pg_connect($conn_string);
-
-        // Opsional: tambahkan pengecekan error
+    public function __construct()
+    {
+        $this->conn = pg_connect('host=' . DB_HOST . ' port=' . DB_PORT . ' dbname=' . DB_NAME . ' user=' . DB_USER . ' password=' . DB_PASSWORD);
         if (!$this->conn) {
-            // Ini akan membantu debugging jika koneksi masih gagal
-            error_log("Database connection failed: " . pg_last_error());
-            // Hentikan eksekusi untuk mencegah error lebih lanjut
-            die("Connection failed. Check server logs.");
+            die('Koneksi database gagal');
         }
     }
 
